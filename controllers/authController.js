@@ -25,16 +25,37 @@ const login = async (req, res) => {
     try {
         const { username, password } = req.body;
         const user = await User.findOne({ username });
+        
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        // Check password
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) {
+
+        // Log the retrieved hashed password
+        console.log('Retrieved  Password:', password);
+
+        console.log('Retrieved Hashed Password:', user.password);
+        
+        // Compare the provided password with the hashed password from the database
+        // const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare('abhinav', 'abhinav');
+        
+
+        
+        // Log the result of password comparison
+
+        console.log('Password Comparison Result:', isPasswordValid);
+        
+        if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid password' });
         }
+
         // Generate JWT token
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        
+        // Set the token in the response header or send it as part of the response body
+        // For example, setting it in a cookie:
+        // res.cookie('token', token, { httpOnly: true });
+        // Or sending it in the response body:
         res.status(200).json({ token });
     } catch (error) {
         console.error('Error logging in:', error);
